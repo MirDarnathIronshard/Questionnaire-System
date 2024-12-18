@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WebSocket Test</title>
+</head>
+<body>
+<h1>WebSocket Monitoring Test</h1>
+<script>
+    const questionnaireID = 1; // Replace with your questionnaire ID
+    const token = "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MzM4NjkyMjEsInJvbGVzIjpbeyJJRCI6MSwiQ3JlYXRlZEF0IjoiMjAyNC0xMi0wOFQwMTowNDozMy4xMDM5NyswMzozMCIsIlVwZGF0ZWRBdCI6IjIwMjQtMTItMDhUMDE6MjY6NTkuNjE5MzA0KzAzOjMwIiwiRGVsZXRlZEF0IjpudWxsLCJuYW1lIjoic3VwZXJfYWRtaW4iLCJwZXJtaXNzaW9ucyI6bnVsbH1dLCJ1c2VySUQiOjEsInVzZXJuYW1lIjoic3VwZXJfYWRtaW5AZXhhbXBlbC5jb20ifQ.kAEhKHqZ57-ra0-GEOZWi68FCmywk0mmOXDEn9Rn6H0"; // Replace with your JWT token
+
+    const ws = new WebSocket(`ws://localhost:5005/api/questionnaire/monitoring/${questionnaireID}?token=${token}`);
+    ws.onopen = function() {
+        console.log("WebSocket connection opened");
+    };
+
+    ws.onmessage = function(event) {
+        console.log("Received data:", event.data);
+    };
+
+    ws.onclose = function() {
+        console.log("WebSocket connection closed");
+    };
+
+    ws.onerror = function(error) {
+        console.error("WebSocket error:", error);
+    };
+</script>
+</body>
+</html>

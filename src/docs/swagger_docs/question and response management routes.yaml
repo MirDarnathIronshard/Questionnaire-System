@@ -1,0 +1,514 @@
+openapi: 3.0.0
+info:
+  title: "Voting System API - Questions and Responses"
+  description: "API documentation for managing questions and responses"
+  version: "1.0.0"
+
+paths:
+  /api/questions:
+    get:
+      tags:
+        - Questions
+      summary: Get questions by questionnaire ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questionnaire_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of questions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuestionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    post:
+      tags:
+        - Questions
+      summary: Create new question
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionCreate'
+      responses:
+        '201':
+          description: Question created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/questions/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Question ID
+
+    get:
+      tags:
+        - Questions
+      summary: Get question by ID
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Question details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Questions
+      summary: Update question
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionUpdate'
+      responses:
+        '200':
+          description: Question updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Questions
+      summary: Delete question
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Question deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/responses/questionnaire:
+    get:
+      description: "get questionnaire responses"
+      tags:
+        - Responses
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: questionnaire_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        default:
+          description: "get questionnaire responses "
+
+
+
+
+  /api/responses:
+    post:
+      tags:
+        - Responses
+      summary: Create new response
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseCreate'
+      responses:
+        '201':
+          description: Response created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+    get:
+      tags:
+        - Responses
+      summary: Get responses by questionnaire
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questionnaire_id
+          in: query
+          required: true
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
+        - name: page_size
+          in: query
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: List of responses
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedResponseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/responses/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Response ID
+
+    get:
+      tags:
+        - Responses
+      summary: Get response by ID
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Response details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Responses
+      summary: Update response
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResponseUpdate'
+      responses:
+        '200':
+          description: Response updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Responses
+      summary: Delete response
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Response deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    QuestionCreate:
+      type: object
+      required:
+        - text
+        - type
+        - questionnaire_id
+      properties:
+        text:
+          type: string
+          example: "What is your favorite color?"
+        type:
+          type: string
+          enum: [MultipleChoice, ShortAnswer, Descriptive]
+        is_conditional:
+          type: boolean
+          default: false
+        questionnaire_id:
+          type: integer
+        order:
+          type: integer
+          minimum: 1
+        condition:
+          type: string
+        media_url:
+          type: string
+          format: uri
+        correct_answer:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+
+    QuestionUpdate:
+      type: object
+      properties:
+        text:
+          type: string
+        type:
+          type: string
+          enum: [MultipleChoice, ShortAnswer, Descriptive]
+        is_conditional:
+          type: boolean
+        order:
+          type: integer
+        condition:
+          type: string
+        media_url:
+          type: string
+        correct_answer:
+          type: string
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              text:
+                type: string
+
+    ResponseCreate:
+      type: object
+      required:
+        - content
+        - questionnaire_id
+      properties:
+        content:
+          type: string
+          example: "My answer is..."
+        questionnaire_id:
+          type: integer
+        attachment_url:
+          type: string
+          format: uri
+
+    ResponseUpdate:
+      type: object
+      required:
+        - content
+      properties:
+        content:
+          type: string
+        attachment_url:
+          type: string
+          format: uri
+
+    QuestionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            text:
+              type: string
+            type:
+              type: string
+            is_conditional:
+              type: boolean
+            questionnaire_id:
+              type: integer
+            order:
+              type: integer
+            condition:
+              type: string
+            media_url:
+              type: string
+            correct_answer:
+              type: string
+            options:
+              type: array
+              items:
+                $ref: '#/components/schemas/Option'
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    Option:
+      type: object
+      properties:
+        id:
+          type: integer
+        text:
+          type: string
+
+    ResponseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            user_id:
+              type: integer
+            questionnaire_id:
+              type: integer
+            content:
+              type: string
+            is_finalized:
+              type: boolean
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    PaginatedQuestionResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuestionResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    PaginatedResponseResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResponseResponse'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total:
+          type: integer
+        total_pages:
+          type: integer
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Unauthorized access"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Resource not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

@@ -1,0 +1,539 @@
+openapi: 3.0.0
+info:
+  title: "Voting System API - Additional Routes"
+  description: "API documentation for questionnaire management and role management"
+  version: "1.0.0"
+
+paths:
+  /api/questionnaire/publish-questionnaire/{id}:
+    post:
+      tags:
+        - Questionnaires
+      summary: Publish a questionnaire
+      security:
+        - BearerAuth: [ ]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Questionnaire ID
+      responses:
+        '200':
+          description: Questionnaire published successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/questionnaire/canceled-questionnaire/{id}:
+      post:
+        tags:
+          - Questionnaires
+        summary: Cancel a questionnaire
+        security:
+          - BearerAuth: [ ]
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+            description: Questionnaire ID
+        responses:
+          '200':
+            description: Questionnaire cancelled successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SuccessResponse'
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+          '404':
+            $ref: '#/components/responses/NotFoundError'
+
+  /api/questionnaire:
+    post:
+      summary: Create a new questionnaire
+      description: Create a new questionnaire with basic details.
+      tags:
+        - Questionnaires
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        description: Questionnaire creation payload
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireCreate'
+      responses:
+        '201':
+          description: Questionnaire created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized (missing or invalid token)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/questionnaire/user:
+    get:
+      tags:
+        - Questionnaires
+      summary: Get current user's questionnaires
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of user's questionnaires
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+
+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/questionnaire/active:
+    get:
+      tags:
+        - Questionnaires
+      summary: Get active questionnaires
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of active questionnaires
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/questionnaire/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Questionnaire ID
+
+    get:
+      tags:
+        - Questionnaires
+      summary: Get questionnaire by ID
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Questionnaire details
+          content:
+
+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - Questionnaires
+      summary: Update questionnaire
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireUpdate'
+      responses:
+        '200':
+          description: Questionnaire updated successfully
+          content:
+
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - Questionnaires
+      summary: Delete questionnaire
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Questionnaire deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/questionnaire_role:
+    post:
+      tags:
+        - QuestionnaireRoles
+      summary: Create questionnaire role
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireRoleCreate'
+      responses:
+        '201':
+          description: Role created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireRoleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+
+  /api/questionnaire_role/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+        description: Role ID
+
+    get:
+      tags:
+        - QuestionnaireRoles
+      summary: Get questionnaire role
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Role details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireRoleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    put:
+      tags:
+        - QuestionnaireRoles
+      summary: Update questionnaire role
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuestionnaireRoleUpdate'
+      responses:
+        '200':
+          description: Role updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireRoleResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+    delete:
+      tags:
+        - QuestionnaireRoles
+      summary: Delete questionnaire role
+      security:
+        - BearerAuth: []
+      responses:
+        '204':
+          description: Role deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    QuestionnaireCreate:
+      type: object
+      required:
+        - title
+        - start_time
+        - end_time
+        - step_type
+        - anonymity_level
+        - owner_id
+        - allowed_genders
+        - min_age
+        - max_age
+      properties:
+        title:
+          type: string
+          example: "Best Doctor Survey"
+        allowed_genders:
+          type: string
+          example: "all"
+        min_age:
+          type: integer
+          example: 0
+          description: "0 for all user"
+        max_age:
+          type: integer
+          example: 0
+          description: "0 for all user"
+        description:
+          type: string
+          example: "A survey to find the best doctor in the world."
+        start_time:
+          type: string
+          format: date-time
+          example: "2024-12-08T10:00:00Z"
+        end_time:
+          type: string
+          format: date-time
+          example: "2024-12-15T10:00:00Z"
+        step_type:
+          type: string
+          enum: [ Sequential, Random ]
+          example: "Sequential"
+        allow_backtrack:
+          type: boolean
+          default: true
+        max_attempts:
+          type: integer
+          default: 1
+          example: 3
+        anonymity_level:
+          type: string
+          enum: [ Public, OwnerOnly, Anonymous ]
+          example: "OwnerOnly"
+        response_edit_deadline:
+          type: string
+          format: date-time
+          example: "2024-12-15T12:00:00Z"
+        owner_id:
+          type: integer
+          example: 1
+
+    QuestionnaireResponse:
+        type: object
+        properties:
+          status:
+            type: string
+            example: "success"
+          data:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 101
+              title:
+                type: string
+                example: "Best Doctor Survey"
+              description:
+                type: string
+                example: "A survey to find the best doctor in the world."
+              start_time:
+                type: string
+                format: date-time
+              end_time:
+                type: string
+                format: date-time
+              step_type:
+                type: string
+                enum: [ Sequential, Random ]
+              allow_backtrack:
+                type: boolean
+              max_attempts:
+                type: integer
+              anonymity_level:
+                type: string
+                enum: [ Public, OwnerOnly, Anonymous ]
+              response_edit_deadline:
+                type: string
+                format: date-time
+              owner_id:
+                type: integer
+              created_at:
+                type: string
+                format: date-time
+              status:
+                type: string
+                example: "draft"
+
+    ErrorResponse:
+        type: object
+        properties:
+          status:
+            type: string
+            example: "error"
+          message:
+            type: string
+            example: "Invalid input parameters"
+    QuestionnaireUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          example: "Updated Survey Title"
+        description:
+          type: string
+        start_time:
+          type: string
+          format: date-time
+        end_time:
+          type: string
+          format: date-time
+        step_type:
+          type: string
+          enum: [Sequential, Random]
+        allow_backtrack:
+          type: boolean
+        max_attempts:
+          type: integer
+        anonymity_level:
+          type: string
+          enum: [Public, OwnerOnly, Anonymous]
+
+    QuestionnaireRoleCreate:
+      type: object
+      required:
+        - questionnaire_id
+        - user_id
+        - name
+      properties:
+        questionnaire_id:
+          type: integer
+          description: The questionnaire ID
+        name:
+          type: string
+          description: The role name
+          example: "editor"
+
+    QuestionnaireRoleUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "viewer"
+        is_active:
+          type: boolean
+          example: true
+
+    QuestionnaireRoleResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+            questionnaire_id:
+              type: integer
+            user_id:
+              type: integer
+            is_active:
+              type: boolean
+            created_at:
+              type: string
+              format: date-time
+            updated_at:
+              type: string
+              format: date-time
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Unauthorized access"
+
+    NotFoundError:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Resource not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

@@ -1,0 +1,160 @@
+@startuml
+
+' تعریف کلاس User
+class User {
+    - ID : uint [PK]
+    - NationalID : string [unique, not null]
+    - Email : string [unique, not null]
+    - Password : string [not null]
+    - FirstName : string
+    - LastName : string
+    - BirthDate : date
+    - City : string
+    - Wallet : decimal [default: initial amount]
+    - Is2FAEnabled : bool [default: false]
+    - CreatedAt : datetime
+    - UpdatedAt : datetime
+}
+
+' تعریف کلاس Questionnaire
+class Questionnaire {
+    - ID : uint [PK]
+    - Title : string [not null]
+    - Description : string
+    - CreatedAt : datetime
+    - StartTime : datetime
+    - EndTime : datetime
+    - IsSequential : bool [default: true]
+    - IsRandom : bool [default: false]
+    - AllowBacktrack : bool [default: true]
+    - MaxAttempts : int [default: 1]
+    - TimeLimit : int (minutes)
+    - AnonymityLevel : enum {Public, OwnerOnly, Anonymous}
+    - ResponseEditDeadline : datetime
+    - OwnerID : uint [FK -> User.ID]
+}
+
+' تعریف کلاس QuestionnaireRole
+class QuestionnaireRole {
+    - ID : uint [PK]
+    - Name : string [not null]
+    - UserID : uint [not null]
+    - QuestionnaireID : uint [FK -> Questionnaire.ID]
+}
+
+' تعریف کلاس QuestionnairePermission
+class QuestionnairePermission {
+    - ID : uint [PK]
+    - Name : string [unique, not null]
+}
+
+' تعریف کلاس QuestionnaireRolePermission
+class QuestionnaireRolePermission {
+    - QuestionnaireRoleID : uint [FK -> QuestionnaireRole.ID]
+    - QuestionnairePermissionID : uint [FK -> QuestionnairePermission.ID]
+}
+
+' تعریف کلاس UserQuestionnaireAccess برای مدیریت دسترسی کاربران به پرسشنامه‌ها
+class UserQuestionnaireAccess {
+    - ID : uint [PK]
+    - UserID : uint [FK -> User.ID]
+    - QuestionnaireID : uint [FK -> Questionnaire.ID]
+    - QuestionnaireRoleID : uint [FK -> QuestionnaireRole.ID]
+    - ExpiryDate : datetime (optional)
+}
+
+' تعریف کلاس Question
+class Question {
+    - ID : uint [PK]
+    - Text : string [not null]
+    - Type : enum {MultipleChoice, Descriptive}
+    - IsConditional : bool [default: false]
+    - Condition : string (optional)
+    - MediaURL : string (optional)
+    - CorrectAnswer : string (optional)
+    - QuestionnaireID : uint [FK -> Questionnaire.ID]
+    - Order : int
+}
+
+' تعریف کلاس Option
+class Option {
+    - ID : uint [PK]
+    - Text : string [not null]
+    - QuestionID : uint [FK -> Question.ID]
+}
+
+' تعریف کلاس Response
+class Response {
+    - ID : uint [PK]
+    - UserID : uint [FK -> User.ID]
+    - QuestionnaireID : uint [FK -> Questionnaire.ID]
+    - QuestionID : uint [FK -> Question.ID]
+    - OptionID : uint
+    - Answer : string
+    - IsFinalized : bool [default: false]
+    - CreatedAt : datetime
+    - UpdatedAt : datetime
+}
+
+' تعریف کلاس Notification
+class Notification {
+    - ID : uint [PK]
+    - UserID : uint [FK -> User.ID]
+    - Type : string [not null]
+    - Message : string [not null]
+    - IsRead : bool [default: false]
+    - CreatedAt : datetime
+}
+
+' تعریف کلاس Chat
+class Chat {
+    - ID : uint [PK]
+    - QuestionnaireID : uint [FK -> Questionnaire.ID]
+    - CreatedAt : datetime
+}
+
+' تعریف کلاس Message
+class Message {
+    - ID : uint [PK]
+    - ChatID : uint [FK -> Chat.ID]
+    - UserID : uint [FK -> User.ID]
+    - Content : string [not null]
+    - AttachmentURL : string (optional)
+    - CreatedAt : datetime
+}
+
+' تعریف کلاس VoteTransaction
+class VoteTransaction {
+    - ID : uint [PK]
+    - FromUserID : uint [FK -> User.ID]
+    - ToUserID : uint [FK -> User.ID]
+    - Amount : decimal [not null]
+    - CreatedAt : datetime
+}
+
+' روابط بین کلاس‌ها
+
+Questionnaire "1" -- "0..*" QuestionnaireRole : defines
+QuestionnaireRole "1" -- "0..*" QuestionnaireRolePermission : has
+QuestionnairePermission "1" -- "0..*" QuestionnaireRolePermission : assigned to
+
+Questionnaire "1" -- "0..*" Question : contains
+Question "1" -- "0..*" Option : has
+Question "1" -- "0..*" Response : receives
+User "1" -- "0..*" Response : submits
+
+Questionnaire "1" -- "1" Chat : has
+Chat "1" -- "0..*" Message : contains
+User "1" -- "0..*" Message : sends
+
+User "1" -- "0..*" Notification : receives
+
+User "1" -- "0..*" VoteTransaction : sends
+User "1" -- "0..*" VoteTransaction : receives
+
+' رابطه جدید بین Questionnaire و User با استفاده از UserQuestionnaireAccess
+User "1" -- "0..*" UserQuestionnaireAccess : has access to
+Questionnaire "1" -- "0..*" UserQuestionnaireAccess : accessed by
+QuestionnaireRole "1" -- "0..*" UserQuestionnaireAccess : with role
+
+@enduml

@@ -1,0 +1,151 @@
+openapi: 3.0.0
+info:
+  title: "Voting System API - Monitoring and Analytics"
+  description: "API documentation for monitoring questionnaire responses and analytics"
+  version: "1.0.0"
+
+paths:
+  /api/questionnaire/monitoring/{id}:
+    get:
+      tags:
+        - Monitoring
+      summary: Get real-time monitoring data for questionnaire
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Questionnaire ID
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+          description: token
+      x-websocket:
+        url: ws://api.example.com/questionnaire/monitoring/{id}
+        protocol: monitoring
+        description: Real-time questionnaire monitoring
+      responses:
+        '200':
+          description: Questionnaire analytics data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireAnalytics'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+      x-websocket-info:
+        type: object
+        properties:
+          url:
+            type: string
+            format: uri
+            example: ws://api.example.com/questionnaire/monitoring/{id}
+          protocol:
+            type: string
+            example: monitoring
+
+components:
+  schemas:
+    ResponseData:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          description: ID of the user who submitted the response
+        option:
+          type: string
+          description: Selected option or provided answer
+        timestamp:
+          type: string
+          format: date-time
+          description: When the response was submitted
+
+    QuestionnaireAnalytics:
+      type: object
+      properties:
+        total_responses:
+          type: integer
+          example: 120
+        completion_rate:
+          type: number
+          format: float
+          example: 0.75
+        average_time_spent:
+          type: number
+          format: float
+          example: 5.7
+        responses_by_option:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            "Option 1": 45
+            "Option 2": 30
+            "Option 3": 25
+        daily_responses:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            "2023-06-01": 20
+            "2023-06-02": 35
+            "2023-06-03": 25
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Unauthorized access"
+
+    ForbiddenError:
+      description: User does not have monitoring permission
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Permission denied for monitoring"
+
+    NotFoundError:
+      description: Questionnaire not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Questionnaire not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

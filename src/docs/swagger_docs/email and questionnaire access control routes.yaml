@@ -1,0 +1,272 @@
+openapi: 3.0.0
+info:
+  title: "Voting System API - Email and Access Control"
+  description: "API documentation for email services and questionnaire access control"
+  version: "1.0.0"
+
+paths:
+  /api/emails/send:
+    post:
+      tags:
+        - Email
+      summary: Send email
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - to
+                - subject
+                - body
+              properties:
+                to:
+                  type: string
+                  format: email
+                  example: "recipient@example.com"
+                subject:
+                  type: string
+                  example: "Questionnaire Invitation"
+                body:
+                  type: string
+                  example: "You have been invited to participate in a questionnaire..."
+      responses:
+        '200':
+          description: Email queued for delivery
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+  /api/questionnaire-access/assign:
+    post:
+      tags:
+        - Questionnaire Access
+      summary: Assign role to user for questionnaire
+      security:
+        - BearerAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignRoleRequest'
+      responses:
+        '200':
+          description: Role assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+
+  /api/questionnaire-access/revoke/{access_id}:
+    delete:
+      tags:
+        - Questionnaire Access
+      summary: Revoke user access to questionnaire
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: access_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Access ID to revoke
+      responses:
+        '200':
+          description: Access revoked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/questionnaire-access/{questionnaire_id}:
+    get:
+      tags:
+        - Questionnaire Access
+      summary: Get users with access to questionnaire
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: questionnaire_id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Questionnaire ID
+      responses:
+        '200':
+          description: List of users with access
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/UserAccess'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+components:
+  schemas:
+    AssignRoleRequest:
+      type: object
+      required:
+        - user_id
+        - questionnaire_id
+        - role_id
+      properties:
+        user_id:
+          type: integer
+        questionnaire_id:
+          type: integer
+        role_id:
+          type: integer
+        expires_at:
+          type: string
+          format: date-time
+          description: Optional expiration date for the role assignment
+          example: "2023-12-31T23:59:59Z"
+
+    UserAccess:
+      type: object
+      properties:
+        id:
+          type: integer
+        user:
+          type: object
+          properties:
+            id:
+              type: integer
+            email:
+              type: string
+            first_name:
+              type: string
+            last_name:
+              type: string
+        role:
+          type: object
+          properties:
+            id:
+              type: integer
+            name:
+              type: string
+        expires_at:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Unauthorized access"
+
+    ForbiddenError:
+      description: User does not have permission to perform this action
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Permission denied"
+
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Validation failed"
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Resource not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

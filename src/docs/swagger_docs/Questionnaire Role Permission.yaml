@@ -1,0 +1,267 @@
+openapi: 3.0.0
+info:
+  title: Questionnaire Role Permission API
+  version: 1.0.0
+  description: API endpoints for managing questionnaire role permissions
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    AssignPermissionsRequest:
+      type: object
+      required:
+        - questionnaire_id
+        - role_id
+        - permission_ids
+      properties:
+        questionnaire_id:
+          type: integer
+          format: uint
+          example: 1
+        role_id:
+          type: integer
+          format: uint
+          example: 2
+        permission_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2, 3]
+
+    RemovePermissionsRequest:
+      type: object
+      required:
+        - questionnaire_id
+        - role_id
+        - permission_ids
+      properties:
+        questionnaire_id:
+          type: integer
+          format: uint
+          example: 1
+        role_id:
+          type: integer
+          format: uint
+          example: 2
+        permission_ids:
+          type: array
+          items:
+            type: integer
+          example: [1, 2, 3]
+
+    QuestionnairePermission:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: uint
+        name:
+          type: string
+        description:
+          type: string
+        action:
+          type: string
+        resource:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        data:
+          type: object
+
+paths:
+  /api/questionnaire-role-permissions/assign:
+    post:
+      summary: Assign permissions to a role
+      tags:
+        - Questionnaire Role Permissions
+      parameters:
+        - name: questionnaire_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: uint
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AssignPermissionsRequest'
+      responses:
+        '200':
+          description: Permissions assigned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/questionnaire-role-permissions/remove:
+    delete:
+      summary: Remove permissions from a role
+      tags:
+        - Questionnaire Role Permissions
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RemovePermissionsRequest'
+      responses:
+        '200':
+          description: Permissions removed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/questionnaire-role-permissions/{role_id}:
+    get:
+      summary: Get permissions for a specific role
+      tags:
+        - Questionnaire Role Permissions
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: role_id
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: uint
+        - name: questionnaire_id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: uint
+      responses:
+        '200':
+          description: List of permissions for the role
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestionnairePermission'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Role not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

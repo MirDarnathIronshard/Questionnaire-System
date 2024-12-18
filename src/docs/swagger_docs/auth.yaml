@@ -1,0 +1,71 @@
+openapi: 3.0.0
+info:
+  title: "Auth"
+  description: "JWT authentication"
+  version: "1.0.0"
+
+paths:
+  /api/register:
+    post:
+      summary: register new user
+      operationId: RegisterNewUser
+      tags:
+        - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRegister'
+      responses:
+        default:
+          $ref: '#/components/responses/GenericResponse'
+  /api/login:
+    post:
+      summary: login user
+      operationId: loginUser
+      tags:
+        - auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthLogin'
+      responses:
+        default:
+          $ref: '#/components/responses/GenericResponse'
+
+components:
+  responses:
+    GenericResponse:
+      description: Any response from the server
+
+
+  schemas:
+    AuthLogin:
+      type: object
+      properties:
+        email:
+          type: string
+          default: super_admin@exampel.com
+        password:
+          type: string
+          default: admin
+    AuthRegister:
+      type: object
+      properties:
+        email:
+          type: string
+          default: test@test.com
+        password:
+          type: string
+          default: 123456
+        national_id:
+          type: string
+          default: 1362056170
+        gender:
+          type: string
+          default: all
+
+
+
+

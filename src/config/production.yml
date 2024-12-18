@@ -1,0 +1,58 @@
+server :
+     internalPort : 5005
+     externalPort : 5005
+     runMode : debug
+logger :
+     filePath : ../logs/
+     encoding : json
+     level : debug
+     logger : zap
+postgres :
+     host : localhost
+     port : 5432
+     user : postgres
+     password : admin
+     dbName : voting_system_db
+     sslMode : disable
+     maxIdleConns : 15
+     maxOpenConns : 100
+     connMaxLifetime : 5
+redis :
+     host : localhost
+     port : 6379
+     password : password
+     db : 0
+     dialTimeout : 5
+     readTimeout : 5
+     writeTimeout : 5
+     poolSize : 10
+     poolTimeout : 15
+     idleCheckFrequency : 500
+password :
+     includeChars : true
+     includeDigits : true
+     minLength : 6
+     maxLength : 64
+     includeUppercase : true
+     includeLowercase : true
+otp :
+     expireTime : 120
+     digits : 6
+     limiter : 100
+jwt :
+     secret : "mySecretKey"
+     refreshSecret : "mySecretKey"
+     accessTokenExpireDuration : 1440
+     refreshTokenExpireDuration : 60
+rabbitmq:
+     url: "amqp://guest:guest@localhost:5672/"
+     exchange_name: "notifications"
+     queue_name: "notifications_queue"
+     routing_key: "notification.#"
+     timeout: 5
+email:
+     from: "noreply@example.com"
+     smtp_host: "smtp.gmail.com"
+     smtp_port: 587
+     username: "email@gmail.com"
+     password: "password"

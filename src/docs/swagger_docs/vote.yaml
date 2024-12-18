@@ -1,0 +1,238 @@
+openapi: 3.0.0
+info:
+  title: "Vote Transaction API"
+  description: "API documentation for vote transactions in the voting system"
+  version: "1.0.0"
+
+paths:
+  /api/vote-transactions:
+    post:
+      tags:
+        - Vote Transactions
+      summary: Create vote transaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateVoteTransactionRequest'
+      responses:
+        '201':
+          description: Vote transaction created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VoteTransactionResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '422':
+          description: Insufficient funds or invalid transaction state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/vote-transactions/{id}/confirm:
+    put:
+      tags:
+        - Vote Transactions
+      summary: Confirm vote transaction
+      description: Confirm a pending vote transaction and transfer access rights
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Transaction ID
+      responses:
+        '200':
+          description: Transaction confirmed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '403':
+          $ref: '#/components/responses/ForbiddenError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '422':
+          description: Insufficient funds or invalid transaction state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    CreateVoteTransactionRequest:
+      type: object
+      required:
+        - buyer_id
+        - questionnaire_id
+        - amount
+      properties:
+        buyer_id:
+          type: integer
+          description: The ID of the user buying access
+        questionnaire_id:
+          type: integer
+          description: The ID of the questionnaire being purchased
+        amount:
+          type: number
+          format: float
+          minimum: 0
+          description: The amount for the transaction
+    VoteTransactionResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        seller_id:
+          type: integer
+        buyer_id:
+          type: integer
+        questionnaire_id:
+          type: integer
+        amount:
+          type: number
+          format: float
+        status:
+          type: string
+          enum: [ pending, confirmed, cancelled ]
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    VoteTransaction:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        seller_id:
+          type: integer
+          example: 1
+        buyer_id:
+          type: integer
+          example: 2
+        questionnaire_id:
+          type: integer
+          example: 1
+        amount:
+          type: number
+          format: float
+          example: 100.00
+        status:
+          type: string
+          enum: [pending, confirmed, cancelled]
+          example: "pending"
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Operation completed successfully"
+        data:
+          $ref: '#/components/schemas/VoteTransaction'
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "error"
+        message:
+          type: string
+          example: "Operation failed"
+        errors:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+              message:
+                type: string
+
+  responses:
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    UnauthorizedError:
+      description: Authentication required
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Authentication required"
+
+    ForbiddenError:
+      description: Permission denied
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Permission denied"
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Resource not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []

@@ -1,0 +1,356 @@
+openapi: 3.0.0
+info:
+  title: "Voting System API - QuestionnaireRoles and Permissions"
+  description: "API documentation for managing questionnaire-specific roles and permissions"
+  version: "1.0.0"
+
+paths:
+  /api/questionnaire_role/questionnaire/{id}:
+    get:
+      tags:
+        - QuestionnaireRoles
+      summary: Get user questionnaire roles for a specific questionnaire
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+          description: Questionnaire ID
+      responses:
+        '200':
+          description: List of questionnaire roles
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "success"
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/QuestionnaireRole'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+
+  /api/questionnaire_role:
+    post:
+      tags:
+        - QuestionnaireRoles
+      summary: Create questionnaire role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateQuestionnaireRole'
+      responses:
+        '201':
+          description: Questionnaire role created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuestionnaireRoleResponse'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+
+    get:
+      tags:
+        - QuestionnaireRoles
+      summary: List questionnaire roles
+      responses:
+        '200':
+          description: List of questionnaire roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/QuestionnaireRoleResponse'
+
+  /api/questionnaire_role/{id}:
+      get:
+        tags:
+          - QuestionnaireRoles
+        summary: Get questionnaire role
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+        responses:
+          '200':
+            description: Questionnaire role details
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/QuestionnaireRoleResponse'
+          '404':
+            $ref: '#/components/responses/NotFoundError'
+
+      put:
+        tags:
+          - QuestionnaireRoles
+        summary: Update questionnaire role
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UpdateQuestionnaireRole'
+        responses:
+          '200':
+            description: Questionnaire role updated
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/QuestionnaireRoleResponse'
+          '400':
+            $ref: '#/components/responses/ValidationError'
+          '404':
+            $ref: '#/components/responses/NotFoundError'
+
+      delete:
+        tags:
+          - QuestionnaireRoles
+        summary: Delete questionnaire role
+        parameters:
+          - name: id
+            in: path
+            required: true
+            schema:
+              type: integer
+        responses:
+          '204':
+            description: Questionnaire role deleted
+          '404':
+            $ref: '#/components/responses/NotFoundError'
+
+
+  /api/questionnaire_role/assignRole:
+      post:
+        tags:
+          - QuestionnaireRoles
+        summary: Assign role to user
+        security:
+          - BearerAuth: []
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssignRoleRequest'
+        responses:
+          '200':
+            description: Role assigned successfully
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/SuccessResponse'
+          '401':
+            $ref: '#/components/responses/UnauthorizedError'
+          '400':
+            $ref: '#/components/responses/ValidationError'
+
+components:
+  schemas:
+    CreateQuestionnaireRole:
+      type: object
+      required:
+        - name
+        - permissions
+      properties:
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    UpdateQuestionnaireRole:
+      type: object
+      properties:
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+    QuestionnaireRoleCreate:
+      type: object
+      required:
+        - questionnaire_id
+        - name
+      properties:
+        questionnaire_id:
+          type: integer
+          description: The questionnaire ID
+          example: 1
+
+        name:
+          type: string
+          description: The role name
+          example: "editor"
+
+    QuestionnaireRoleUpdate:
+      type: object
+      properties:
+        questionnaire_id:
+          type: integer
+          example: 1
+        user_id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: "viewer"
+
+    QuestionnaireRole:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        user_id:
+          type: integer
+        questionnaire_id:
+          type: integer
+        permissions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Permission'
+        expires_at:
+          type: string
+          format: date-time
+        is_active:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Permission:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        action:
+          type: string
+        resource:
+          type: string
+
+    AssignRoleRequest:
+      type: object
+      required:
+        - questionnaire_id
+        - user_id
+        - role
+      properties:
+        questionnaire_id:
+          type: integer
+          example: 1
+        role:
+          type: string
+          example: "editor"
+
+    QuestionnaireRoleResponse:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        permissions:
+          type: array
+          items:
+            type: string
+
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "success"
+        message:
+          type: string
+          example: "Operation completed successfully"
+
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Unauthorized access"
+
+    ValidationError:
+      description: Invalid input data
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Validation failed"
+              errors:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    field:
+                      type: string
+                    message:
+                      type: string
+
+    NotFoundError:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                example: "error"
+              message:
+                type: string
+                example: "Resource not found"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - BearerAuth: []
